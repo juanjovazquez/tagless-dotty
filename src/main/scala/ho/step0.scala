@@ -1,6 +1,8 @@
 package ho
 package step0
 
+import scala.util.{ Left, Right }
+
 // lambda-calculus with booleans
 // First attempt: Untyped and tagged
 
@@ -63,6 +65,38 @@ def eval(e: Exp, env: Env): U = (env, e) match
       case UA(f0) => f0(eval(arg, env0))
       case UB(_)  => sys.error("Impossible!") // not exhaustive
 
+// Unfortunately, `eval` is partial and fails evaluating
+// the term:
+val ti2a = A(B(true), B(false)) // app(true, false) !!
+
+// Also `lookup` is partial and accepts open terms as:
+val ti2o  = A(L(V(VS(VZ))), B(true)) // ... instead of:
+val ti2ok = A(L(V(VZ)), B(true))
+
+// The object language is untyped so errors may occur
+// during evaluation. To prevent erros we need:
+
+type ErrMsg = String
+def typeckeck(e: Exp): Either[ErrMsg, Exp] = ???
+
+def safeEval(e: Exp) = typeckeck(e) match
+  case Right(x) => println(eval(x, Nil))
+  case Left(t)  => println(s"Type error: $t")
+
+// The presence of type tags (UB, UA) and the need
+// for runtime checking reveals the lack of type safety.
+// It's possible to create ill terms. The embedding is
+// not "tight". We failed.
+
 @main def ho_step0_main() =
   println(eval(ti1, Nil))
   // UB(true) 
+
+  //println(eval(ti2a, Nil))
+  // java.lang.RuntimeException: Impossible!
+
+  //println(eval(ti2o, Nil))
+  // java.lang.RuntimeException: Impossible!
+
+  println(eval(ti2ok, Nil))
+  // UB(true)
