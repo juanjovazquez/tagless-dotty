@@ -1,7 +1,7 @@
 package fo
 package step2
 
-import step1.ExpSym
+import step1.{ ExpSym, eval, view }
 import step1.syntax._
 
 trait MulSym[Repr]:
@@ -15,7 +15,7 @@ type P[Repr] = MulSym[Repr] ?=> step1.P[Repr]
 // the new `mul` appears alongside the old
 // forms `lit`, `neg` and `add` 
 def tfm1[Repr]: P[Repr] =
-  add(lit(7), (neg(mul(lit(2), (lit(2))))))
+  add(lit(7), neg(mul(lit(2), lit(2))))
 
 // incorporates with no changes the term
 // `step1.tf1` from the unextended language
@@ -36,3 +36,16 @@ object MulSym:
 // The final encoding makes it easy to add not 
 // only new interpretations but also new language
 // forms making the interpreters extensible by default.
+
+@main def fo_step2_main() =
+  println(eval(tfm1))
+  // 3
+
+  println(eval(tfm2))
+  // 35
+
+  println(view(tfm1))
+  // (7 + (-(2 * 2)))
+
+  println(view(tfm2))
+  // (7 * (8 + (-(1 + 2))))

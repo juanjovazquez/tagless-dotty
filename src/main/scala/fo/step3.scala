@@ -1,7 +1,7 @@
 package fo
 package step3
 
-import step1.ExpSym
+import step1.{ ExpSym, tf1, eval, view }
 import step2.MulSym
 import scala.language.postfixOps
 import scala.util.{ Try, Right, Left }
@@ -53,6 +53,8 @@ object Tree:
 
 import Tree.{ Lit, Neg, Add, Mul }
 
+def toTree(t: Tree): Tree = t
+
 def fromTree[Repr: ExpSym](t: Tree): Either[ErrMsg, Repr] =
   t match
     case Lit(x) => 
@@ -65,6 +67,11 @@ def fromTree[Repr: ExpSym](t: Tree): Either[ErrMsg, Repr] =
         r0 <- fromTree(r)
       yield ExpSym[Repr].add(l0, r0)
     case t => Left(s"Invalid tree: $t")
+
+def evalTree[Repr: ExpSym](t: Tree): Unit =
+  fromTree[Repr](t) match
+    case Left(e)  => println(s"Error: $e")
+    case Right(r) => println(r)
 
 // We lost polymorphism...
 
@@ -84,6 +91,13 @@ object Expr:
 
     def add(e1: Expr, e2: Expr): Expr = new :
       def apply[Repr]: P2[Repr] = ExpSym[Repr].add(e1[Repr], e2[Repr])
+
+def evalTreeChurch(t: Tree): Unit =
+  fromTree[Expr](t) match
+    case Left(e)  => println(s"Error: $e")
+    case Right(r) => 
+      println(r[Int])
+      println(r[String])
 
 // Extensibiity in the parser
 trait OpenInterpreter[A, B, E]:
@@ -125,3 +139,21 @@ class MulSymInterpreter[Repr: MulSym] extends OpenInterpreter[Tree, Repr, ErrMsg
 
 def parser[Repr: ExpSym: MulSym](t: Tree): Either[ErrMsg, Repr] = 
   (ExpSymInterpreter() orElse MulSymInterpreter() close) apply t
+
+@main def fo_step3_main() =
+  println(toTree(tf1))
+  // Node(Add,List(Node(Lit,List(Leaf(8))), 
+  //               Node(Neg,List(Node(Add,List(Node(Lit,List(Leaf(1))), 
+  //                                           Node(Lit,List(Leaf(2)))))))))
+
+  evalTree[Int](toTree(tf1))
+  // 5
+
+  
+
+  evalTree[Int](Tree.Leaf("<bad input>"))
+  // Error: Invalid tree: Leaf(<bad input>)
+
+  evalTreeChurch(toTree(tf1))
+  // 5
+  // (8 + (-(1 + 2)))

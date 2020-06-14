@@ -53,5 +53,9 @@ def tf1[Repr]: P[Repr] =
 def eval(x: Int): Int       = x 
 def view(s: String): String = s
 
-//eval(tf1)
-//view(tf1)
+@main def fo_step1_main() =
+  println(eval(tf1))
+  // 5
+
+  println(view(tf1))
+  // (8 + (-(1 + 2)))
