@@ -99,7 +99,7 @@ def evalTreeChurch(t: Tree): Unit =
       println(r[Int])
       println(r[String])
 
-// Extensibiity in the parser
+// Extensibility in the parser
 trait OpenInterpreter[A, B, E]:
   self => // really awkward
 
@@ -148,8 +148,6 @@ def parser[Repr: ExpSym: MulSym](t: Tree): Either[ErrMsg, Repr] =
 
   evalTree[Int](toTree(tf1))
   // 5
-
-  
 
   evalTree[Int](Tree.Leaf("<bad input>"))
   // Error: Invalid tree: Leaf(<bad input>)
