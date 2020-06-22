@@ -49,7 +49,7 @@ object Symantics:
       S(i => z.unS(i - 1))
 
     def lam[Env, A, B](f: S[(A, Env), B]): S[Env, A => B] = 
-      S(i => s"\\\\x$i -> ${f.unS(i + 1)}")
+      S(i => s"(\\\\x$i -> ${f.unS(i + 1)})")
 
     def app[Env, A, B](f: S[Env, A => B], repa: S[Env, A]): S[Env, B] =
       S(i => s"(${f.unS(i)} ${repa.unS(i)})")
@@ -107,4 +107,4 @@ def view[A](e: S[Unit, A]) = e.unS(0)
   // (1 + 2)
 
   println(view(td3))
-  // \\x0 -> ((x0 1) + 2)
+  // (\\x0 -> ((x0 1) + 2))

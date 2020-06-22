@@ -32,11 +32,11 @@ def lookup0(v: Var, env: Env0): Boolean =
 
 // Does not type check!
 
-//def eval0(e: Exp, env: Env) = (env, e) match
-//  case (env0, V(v))  => lookup(v, env0) // Boolean
-//  case (env0, B(b))  => b // Boolean
-//  case (env0, L(e0)) => x => eval0(e0, env0) // Scala function value
-//  case (env0, A(f, arg)) => (eval0(f, env0))(eval0(arg, env0))
+//def eval0(e: Exp, env: Env) = e match
+//  case V(v)  => lookup(v, env) // Boolean
+//  case B(b)  => b // Boolean
+//  case L(e0) => x => eval0(e0, x :: env) // Scala function value
+//  case A(f, arg) => (eval0(f, env))(eval0(arg, env))
 
 // The second branch returns `Booolean` whereas the next one 
 // returns a Scala function value, i.e. `eval0` is ill-typed.
@@ -54,15 +54,15 @@ def lookup(v: Var, env: Env): U =
   (v, env) match
     case (VZ, x :: _)       => x
     case (VS(v), _ :: env0) => lookup(v, env0)
-    case _                  => sys.error("Impossible!")
+    //case _                  => sys.error("Impossible!")
 
-def eval(e: Exp, env: Env): U = (env, e) match
-  case (env0, V(v))      => lookup(v, env)
-  case (env0, B(b))      => UB(b)
-  case (env0, L(e0))     => UA(x => eval(e0, x :: env0))
-  case (env0, A(f, arg)) => 
-    eval(f, env0) match
-      case UA(f0) => f0(eval(arg, env0))
+def eval(e: Exp, env: Env): U = e match
+  case V(v)      => lookup(v, env)
+  case B(b)      => UB(b)
+  case L(e0)     => UA(x => eval(e0, x :: env))
+  case A(f, arg) => 
+    eval(f, env) match
+      case UA(f0) => f0(eval(arg, env))
       case UB(_)  => sys.error("Impossible!") // not exhaustive
 
 // Unfortunately, `eval` is partial and fails evaluating
@@ -77,14 +77,14 @@ val ti2ok = A(L(V(VZ)), B(true))
 // during evaluation. To prevent erros we need:
 
 type ErrMsg = String
-def typeckeck(e: Exp): Either[ErrMsg, Exp] = ???
+def typecheck(e: Exp): Either[ErrMsg, Exp] = ???
 
-def safeEval(e: Exp) = typeckeck(e) match
+def safeEval(e: Exp) = typecheck(e) match
   case Right(x) => println(eval(x, Nil))
   case Left(t)  => println(s"Type error: $t")
 
 // The presence of type tags (UB, UA) and the need
-// for runtime checking reveals the lack of type safety.
+// for runtime checking reveal the lack of type safety.
 // It's possible to create ill terms. The embedding is
 // not "tight". We failed.
 
